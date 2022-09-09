@@ -147,8 +147,6 @@ for site in all_sites:
         print(s.getName(), site.getName(), s.getNationality())
     results[site.getName()] = students
 
-
-
 toCSV(results)
 
 # by now all students should be assigned!!
