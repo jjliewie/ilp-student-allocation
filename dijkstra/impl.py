@@ -1,3 +1,5 @@
+# not using but I want it here ^^^
+
 import heapq
 
 INF = int(1e9)
@@ -10,7 +12,7 @@ graph = {
     4: [(2, 5), (3, 1)]
 }
 
-def lazy_dijkstras(graph, root, k):
+def dijkstra(graph, root, k):
     n = len(graph)
     dist = [INF for _ in range(n)]
     dist[root] = 0
