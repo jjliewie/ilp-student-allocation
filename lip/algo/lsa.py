@@ -50,7 +50,7 @@ class LSA:
         # tc = cost_matrix[row_ind, col_ind].sum()
 
         opt_ass = list(opt_ass)
-        print(opt_ass)
+        # print(opt_ass)
 
         for i in range(len(students)):
             assigned_cost = cost_matrix[i, col_ind[i]]

@@ -74,7 +74,7 @@ with open("lip/files/icare.csv", 'r') as f:
         name, grade, gender, previous, cas_project, return_project)
 
         if return_project:
-            print(pref_sites[0].getName(), tmp_student.getName(), "returning student")
+            # print(pref_sites[0].getName(), tmp_student.getName(), "returning student")
             pref_sites[0].add_student(tmp_student)
             continue
         
@@ -116,7 +116,7 @@ unassigned_students = []
 # print(all_students)
 
 for student_group in all_students:
-    print(len(all_sites), len(student_group))
+    # print(len(all_sites), len(student_group))
     if len(student_group) >= len(all_sites):
         left = LSA.run(student_group, all_sites, nationality_data, total_cas_cnt, total)
         unassigned_students += left
@@ -124,9 +124,8 @@ for student_group in all_students:
         if student_group:
             unassigned_students += student_group
 
-print("total:", total)
+# print("total:", total)
 if len(unassigned_students) >= len(all_sites):
-    print("hi")
     unassigned_students = LSA.run(unassigned_students, all_sites, nationality_data, total_cas_cnt, total)
 if unassigned_students:
     for s in unassigned_students:
@@ -136,7 +135,7 @@ if unassigned_students:
             if pref.getTotal() < minimum_amt:
                 minimum_pref = pref
                 minimum_amt = pref.getTotal()
-        print("final", minimum_pref.getName(), minimum_amt)
+        # print("final", minimum_pref.getName(), minimum_amt)
         minimum_pref.add_student(s)
 
 results = {}
