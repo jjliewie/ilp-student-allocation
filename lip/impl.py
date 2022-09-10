@@ -23,7 +23,8 @@ pos_allocations = {}
 nationality_data = {}
 total_cas_cnt = 0
 
-f9, f10, f11, f12, m9, m10, m11, m12 = [], [], [], [], [], [], [], []
+f9, f10, f11, f12 = [], [], [], []
+m9, m10, m11, m12 = [], [], [], []
 o9, o10, o11, o12 = [], [], [], []
 
 with open("lip/files/real_icare.csv", 'r') as f:
