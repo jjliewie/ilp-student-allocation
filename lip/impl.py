@@ -11,7 +11,7 @@ import csv
 from algo.lsa import LSA
 from obj.student import Student
 from obj.site import Site
-from tocsv import toCSV
+from util.tocsv import toCSV
 from util.popularity import least_popular
 from test.test_results import standard_deviation
 from test.chart import bar, by_amt, pie, by_gender, by_grade, by_nationality
