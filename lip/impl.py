@@ -14,6 +14,7 @@ from obj.site import Site
 from tocsv import toCSV
 from util.popularity import least_popular
 from test.test_results import standard_deviation
+from test.chart import bar, by_amt, pie, by_gender, by_grade, by_nationality
 
 all_site_names = []
 all_sites = []
@@ -173,9 +174,15 @@ for site in all_sites:
     check += [site.getTotal()]
 
 print(standard_deviation(check))
-print(check)
-for site in least_popular(all_sites):
-    print(site.getTotal(), site.getName())
+# print(check)
+# for site in least_popular(all_sites):
+#     print(site.getTotal(), site.getName())
+
+print(least_popular(all_sites)[0].getName())
+
+pie(by_grade(least_popular(all_sites)[0])[0], by_grade(least_popular(all_sites)[0])[1])
+# pie(by_grade(all_sites[1])[0], by_grade(all_sites[1])[1])
+# pie(by_gender(all_sites[1])[0], by_gender(all_sites[1])[1])
 
 toCSV(results)
 

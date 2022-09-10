@@ -16,9 +16,9 @@ class Site:
         self.students += [student]
 
         self.grade_cntr[student.getGrade() - 9] += 1
-        if student.getGender() == "Male":
+        if student.getGender() == "M":
             self.gender_cntr[0] += 1
-        elif student.getGender() == "Female":
+        elif student.getGender() == "F":
             self.gender_cntr[1] += 1
         else: self.gender_cntr[2] += 1
 
@@ -39,9 +39,9 @@ class Site:
         self.students.remove(student)
         self.grade_cntr[student.getGrade()-9] -= 1
         
-        if student.getGender() == "Male":
+        if student.getGender() == "M":
             self.gender_cntr[0] -= 1
-        elif student.getGender() == "Female":
+        elif student.getGender() == "F":
             self.gender_cntr[1] -= 1
         else: self.gender_cntr[2] -= 1
 
