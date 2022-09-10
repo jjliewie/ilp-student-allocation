@@ -12,17 +12,20 @@ from algo.lsa import LSA
 from obj.student import Student
 from obj.site import Site
 from tocsv import toCSV
+from util.popularity import least_popular
+from test.test_results import standard_deviation
+
 all_site_names = []
 all_sites = []
 total = 0
-
+pos_allocations = {}
 nationality_data = {}
 total_cas_cnt = 0
 
 f9, f10, f11, f12, m9, m10, m11, m12 = [], [], [], [], [], [], [], []
 o9, o10, o11, o12 = [], [], [], []
 
-with open("lip/files/icare.csv", 'r') as f:
+with open("lip/files/real_icare.csv", 'r') as f:
     reader = csv.reader(f)
 
     for _, line in enumerate(reader):
@@ -73,9 +76,15 @@ with open("lip/files/icare.csv", 'r') as f:
         tmp_student = Student(email, pref_sites, nationality, 
         name, grade, gender, previous, cas_project, return_project)
 
+        for i in pref_sites:
+            if i in pos_allocations:
+                pos_allocations[i].append(tmp_student)
+            else: pos_allocations[i] = [tmp_student]
+
         if return_project:
             # print(pref_sites[0].getName(), tmp_student.getName(), "returning student")
             pref_sites[0].add_student(tmp_student)
+            tmp_student.setSite(pref_sites[0])
             continue
         
         if grade == 9:
@@ -127,25 +136,47 @@ for student_group in all_students:
 # print("total:", total)
 if len(unassigned_students) >= len(all_sites):
     unassigned_students = LSA.run(unassigned_students, all_sites, nationality_data, total_cas_cnt, total)
+
 if unassigned_students:
     for s in unassigned_students:
         minimum_pref = None
         minimum_amt = int(1e9)
         for pref in s.getPreferences()[::-1]:
-            if pref.getTotal() < minimum_amt:
+            if pref.getTotal() <= minimum_amt:
                 minimum_pref = pref
                 minimum_amt = pref.getTotal()
         # print("final", minimum_pref.getName(), minimum_amt)
         minimum_pref.add_student(s)
+        s.setSite(minimum_pref)
+
+# reassign from least popular site
+
+# pos_allocations = {}
+
+for site in least_popular(all_sites):
+    for pos_student in pos_allocations[site]:
+        if pos_student not in site.getStudents():
+            assigned_site = pos_student.getSite()
+            if assigned_site.getTotal() > site.getTotal():
+                assigned_site.remove_student(pos_student)
+                pos_student.setSite(site)
+                site.add_student(pos_student)
 
 results = {}
+check = []
 
 for site in all_sites:
     students = site.getStudents()
-    for s in students:
-        print(s.getName(), site.getName(), s.getNationality())
+    # for s in students:
+    #     print(s.getName(), site.getName(), s.getNationality())
     results[site.getName()] = students
+    check += [site.getTotal()]
+
+print(standard_deviation(check))
+print(check)
+for site in least_popular(all_sites):
+    print(site.getTotal(), site.getName())
 
 toCSV(results)
 
-# by now all students should be assigned!!
+# by now all students should be assigned and it should be optimal!!

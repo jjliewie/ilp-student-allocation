@@ -13,7 +13,7 @@ class Student:
         self.cas_project = cas_project
         self.return_project = return_project
 
-        # self.assigned_site = None
+        self.assigned_site = None
 
     # def is_assigned(self):
     #     if self.assigned_site: return True
@@ -21,6 +21,9 @@ class Student:
     
     # def assign(self, site):
     #     self.assigned_site = site
+
+    def setSite(self, site):
+        self.assigned_site = site
 
     def getSite(self):
         return self.assigned_site

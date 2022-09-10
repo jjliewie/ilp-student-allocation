@@ -19,7 +19,9 @@ def make_weights(tnat, tcas, total, site, student):
 
     weight += 10*idx
 
-    amt_weight = (site.getTotal()*50//total)
+    if site.getTotal() >= 30:
+        amt_weight = 1000
+    else: amt_weight = (site.getTotal()*100//total)
     weight += amt_weight
     # print("weights: ", site.getTotal(), site.getName(), amt_weight)
 

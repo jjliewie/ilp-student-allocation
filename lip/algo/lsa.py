@@ -22,9 +22,8 @@ class LSA:
 
         for _ in range(ratio):
             site_list += sites
-                    
+    
         unnamed_site = Site("X")
-
         for _ in range(remainder):
             site_list += [unnamed_site]
 
@@ -32,7 +31,6 @@ class LSA:
             weights = []
             for site in site_list:
                 if site.getName() == "X":
-                    # print("wait waht?")
                     weight = 0
                 else:
                     weight = make_weights(nationality_data, total_cas_cnt, total, site, student) # change later
@@ -62,5 +60,6 @@ class LSA:
             else:
                 assignment = site_list[opt_ass[i]]
                 assignment.add_student(students[i])
+                students[i].setSite(assignment)
         
         return manual
