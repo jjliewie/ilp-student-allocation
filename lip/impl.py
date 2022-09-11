@@ -175,15 +175,13 @@ for site in all_sites:
     check += [site.getTotal()]
 
 print(standard_deviation(check))
-# print(check)
-# for site in least_popular(all_sites):
-#     print(site.getTotal(), site.getName())
 
-print(least_popular(all_sites)[0].getName())
+most_popular_site = least_popular(all_sites)[len(all_sites)-1]
+least_popular_site = least_popular(all_sites)[0]
 
-pie(by_grade(least_popular(all_sites)[0])[0], by_grade(least_popular(all_sites)[0])[1])
-# pie(by_grade(all_sites[1])[0], by_grade(all_sites[1])[1])
-# pie(by_gender(all_sites[1])[0], by_gender(all_sites[1])[1])
+print(most_popular_site.getName())
+
+pie(by_nationality(most_popular_site)[0], by_nationality(most_popular_site)[1])
 
 toCSV(results)
 
