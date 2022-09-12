@@ -118,6 +118,8 @@ with open("lip/files/real_icare.csv", 'r') as f:
             else:
                 o12 += [tmp_student]
 
+f.close()
+
 all_students = []
 all_students += [f9] + [f10] + [f11] + [f12]
 all_students += [m9] + [m10] + [m11] + [m12]
@@ -179,9 +181,9 @@ print(standard_deviation(check))
 most_popular_site = least_popular(all_sites)[len(all_sites)-1]
 least_popular_site = least_popular(all_sites)[0]
 
-print(most_popular_site.getName())
+print(least_popular_site.getName())
 
-pie(by_nationality(most_popular_site)[0], by_nationality(most_popular_site)[1])
+# pie(by_nationality(least_popular_site)[0], by_nationality(least_popular_site)[1])
 
 toCSV(results)
 

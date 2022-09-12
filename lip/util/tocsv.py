@@ -8,3 +8,5 @@ def toCSV(results):
             for student in v:
                 row = [k, student.getName(), student.getEmail(), str(student.getGrade()), student.getNationality(), student.getGender()]
                 writer.writerow(row)
+
+    f.close()
