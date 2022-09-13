@@ -15,6 +15,7 @@ from util.tocsv import toCSV
 from util.popularity import least_popular
 from test.test_results import standard_deviation
 from test.chart import bar, by_amt, pie, by_gender, by_grade, by_nationality
+from impl_other import impl_other
 
 all_site_names = []
 all_sites = []
@@ -26,6 +27,8 @@ total_cas_cnt = 0
 f9, f10, f11, f12 = [], [], [], []
 m9, m10, m11, m12 = [], [], [], []
 o9, o10, o11, o12 = [], [], [], []
+
+# shuffle 
 
 with open("lip/files/real_icare.csv", 'r') as f:
     reader = csv.reader(f)
@@ -166,13 +169,15 @@ for site in least_popular(all_sites):
                 pos_student.setSite(site)
                 site.add_student(pos_student)
 
+other_students, other_sites = impl_other(least_popular(all_sites))
+# change nationality_data & total_cas_cnt & total
+just_check = LSA.run(other_students, other_sites, nationality_data, total_cas_cnt, total)
+
 results = {}
 check = []
 
 for site in all_sites:
     students = site.getStudents()
-    # for s in students:
-    #     print(s.getName(), site.getName(), s.getNationality())
     results[site.getName()] = students
     check += [site.getTotal()]
 
@@ -181,9 +186,11 @@ print(standard_deviation(check))
 most_popular_site = least_popular(all_sites)[len(all_sites)-1]
 least_popular_site = least_popular(all_sites)[0]
 
-print(least_popular_site.getName())
+# pie(by_nationality(most_popular_site)[0], by_nationality(most_popular_site)[1])
 
-# pie(by_nationality(least_popular_site)[0], by_nationality(least_popular_site)[1])
+final_students = []
+
+# check cap, move students (if provincial, try to move to provincial)
 
 toCSV(results)
 

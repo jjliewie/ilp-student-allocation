@@ -77,3 +77,8 @@ class Site:
     
     def getTotal(self):
         return self.total_amt
+    
+    def isProvincial(self):
+        if "(P)" in self.name:
+            return True
+        return False
