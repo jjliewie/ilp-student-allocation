@@ -1,6 +1,7 @@
 class Site:
     
-    def __init__(self, name):
+    def __init__(self, name, limit):
+        self.limit = limit
         self.name = name
         self.total_amt = 0
         self.students = []
@@ -10,6 +11,9 @@ class Site:
         # male, female, other
         self.grade_cntr = [0, 0, 0, 0]
         # ninth, tenth, eleventh, twelfth
+    
+    def getLimit(self):
+        return self.limit
     
     def add_student(self, student):
 
@@ -82,3 +86,11 @@ class Site:
         if "(P)" in self.name:
             return True
         return False
+    
+    def isMetro(self):
+        if "(M)" in self.name:
+            return True
+        return False
+    
+    def has_space(self):
+        return self.total_amt < self.limit

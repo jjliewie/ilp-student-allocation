@@ -23,7 +23,7 @@ class LSA:
         for _ in range(ratio):
             site_list += sites
     
-        unnamed_site = Site("X")
+        unnamed_site = Site("X", int(1e9))
         for _ in range(remainder):
             site_list += [unnamed_site]
 

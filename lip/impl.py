@@ -14,46 +14,48 @@ from obj.site import Site
 from util.tocsv import toCSV
 from util.popularity import least_popular
 from test.test_results import standard_deviation
-from test.chart import bar, by_amt, pie, by_gender, by_grade, by_nationality
 from impl_other import impl_other
+from util.over_limit import over_limit
+from util.best_possible_site import assign_students
 
-all_site_names = []
 all_sites = []
 total = 0
 pos_allocations = {}
 nationality_data = {}
 total_cas_cnt = 0
+gender_data = [0, 0, 0]
+# male, female, other
+grade_data = [0, 0, 0, 0]
+# 9, 10, 11, 12
 
 f9, f10, f11, f12 = [], [], [], []
 m9, m10, m11, m12 = [], [], [], []
 o9, o10, o11, o12 = [], [], [], []
 
-# shuffle 
+# initialization
+
+# metro
+with open("lip/files/metro_icare.csv", 'r') as m:
+    reader = csv.reader(m)
+    for line in reader:
+        site_name = line[1]
+        site_cap = int(line[2])
+        all_sites += [Site(site_name, site_cap)]
+m.close()
+
+# provincial
+with open("lip/files/provincial_icare.csv", 'r') as p:
+    reader = csv.reader(p)
+    for line in reader:
+        site_name = line[1]
+        site_cap = int(line[2])
+        all_sites += [Site(site_name, site_cap)]
+p.close()
 
 with open("lip/files/real_icare.csv", 'r') as f:
     reader = csv.reader(f)
-
-    for _, line in enumerate(reader):
-        for i in list(line)[1:5]:
-            if i not in all_site_names:
-                all_site_names += [i]
-        
-        nationality = line[9]
-
-        if nationality in nationality_data:
-            nationality_data[nationality] += 1
-        else: nationality_data[nationality] = 1
-
-        total += 1
-
-    for i in all_site_names:
-        all_sites += [Site(i)]
     
-    f.seek(0)
-    
-    for _, line in enumerate(reader):
-        line = list(line)
-        # print(line)
+    for line in reader:
         email = line[10]
         name = line[7] + " " + line[8]
 
@@ -70,6 +72,12 @@ with open("lip/files/real_icare.csv", 'r') as f:
 
         nationality = line[9]
 
+        if nationality in nationality_data:
+            nationality_data[nationality] += 1
+        else: nationality_data[nationality] = 1
+
+        total += 1
+
         cas_project, return_project = False, False
 
         if line[11].lower() == "yes":
@@ -83,43 +91,56 @@ with open("lip/files/real_icare.csv", 'r') as f:
 
         for i in pref_sites:
             if i in pos_allocations:
-                pos_allocations[i].append(tmp_student)
+                pos_allocations[i] += [tmp_student]
             else: pos_allocations[i] = [tmp_student]
 
         if return_project:
-            # print(pref_sites[0].getName(), tmp_student.getName(), "returning student")
             pref_sites[0].add_student(tmp_student)
             tmp_student.setSite(pref_sites[0])
             continue
+    
+        grade_data[grade-9] += 1
         
         if grade == 9:
             if gender == "F":
                 f9 += [tmp_student]
+                gender_data[1] += 1
             elif gender == "M":
                 m9 += [tmp_student]
+                gender_data[0] += 1
             else:
                 o9 += [tmp_student]
+                gender_data[2] += 1
         elif grade == 10:
             if gender == "F":
                 f10 += [tmp_student]
+                gender_data[1] += 1
             elif gender == "M":
                 m10 += [tmp_student]
+                gender_data[0] += 1
             else:
                 o10 += [tmp_student]
+                gender_data[2] += 1
         elif grade == 11:
             if gender == "F":
                 f11 += [tmp_student]
+                gender_data[0] += 1
             elif gender == "M":
                 m11+= [tmp_student]
+                gender_data[1] += 1
             else:
                 o11 += [tmp_student]
+                gender_data[2] += 1
         else:
             if gender == "F":
                 f12 += [tmp_student]
+                gender_data[1] += 1
             elif gender == "M":
                 m12 += [tmp_student]
+                gender_data[0] += 1
             else:
                 o12 += [tmp_student]
+                gender_data[2] += 1
 
 f.close()
 
@@ -158,16 +179,30 @@ if unassigned_students:
 
 # reassign from least popular site
 
-# pos_allocations = {}
+# print(pos_allocations)
 
 for site in least_popular(all_sites):
     for pos_student in pos_allocations[site]:
-        if pos_student not in site.getStudents():
+        if pos_student not in site.getStudents() and not pos_student.senior_returning():
             assigned_site = pos_student.getSite()
             if assigned_site.getTotal() > site.getTotal():
                 assigned_site.remove_student(pos_student)
                 pos_student.setSite(site)
                 site.add_student(pos_student)
+
+again_student = []
+for site in all_sites:
+    again_student += over_limit(site, nationality_data, grade_data, gender_data)
+
+available_sites = []
+
+for i in all_sites:
+    if i.has_space():
+        available_sites += [i]
+
+assign_students(available_sites, again_student, nationality_data, grade_data, gender_data)
+
+# assign these students fuck julie u gotta do it
 
 other_students, other_sites = impl_other(least_popular(all_sites))
 # change nationality_data & total_cas_cnt & total
@@ -185,6 +220,8 @@ print(standard_deviation(check))
 
 most_popular_site = least_popular(all_sites)[len(all_sites)-1]
 least_popular_site = least_popular(all_sites)[0]
+print(least_popular_site.getName(), least_popular_site.getTotal())
+print(most_popular_site.getName(), most_popular_site.getTotal())
 
 # pie(by_nationality(most_popular_site)[0], by_nationality(most_popular_site)[1])
 

@@ -54,6 +54,18 @@ class Student:
     
     def getPrevious(self):
         return self.previous
+    
+    def want_provincial(self):
+        for s in self.preferences:
+            if "P" not in s.getName():
+                return False
+        return True
+    
+    def want_metro(self):
+        for s in self.preferences:
+            if "M" not in s.getName():
+                return False
+        return True
 
 # debugging
 
