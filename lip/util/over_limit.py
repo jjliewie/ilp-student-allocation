@@ -10,8 +10,10 @@ from obj.site import Site
 
 def over_limit(site, tnat, tgrade, tgender):
     result = []
+
     for student in opt_students(site, tnat, tgrade, tgender):
         site.remove_student(student)
+        student.setSite(None)
         result += [student]
     return result
 

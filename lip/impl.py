@@ -1,12 +1,3 @@
-# import os
-
-# cwd = os.getcwd() 
-# files = os.listdir(cwd)
-# print("Files in %r: %s" % (cwd, files))
-
-# I DEFINITELY NEED TO REFACTOR THIS CODE AND ADD COMMENTS 
-# but I think I named the variables pretty well ^^^
-
 import csv
 from algo.lsa import LSA
 from obj.student import Student
@@ -17,6 +8,7 @@ from test.test_results import standard_deviation
 from impl_other import impl_other
 from util.over_limit import over_limit
 from util.best_possible_site import assign_students
+from util.availability import availability
 
 all_sites = []
 total = 0
@@ -43,6 +35,8 @@ with open("lip/files/metro_icare.csv", 'r') as m:
         all_sites += [Site(site_name, site_cap)]
 m.close()
 
+# print(len(all_sites))
+
 # provincial
 with open("lip/files/provincial_icare.csv", 'r') as p:
     reader = csv.reader(p)
@@ -51,6 +45,8 @@ with open("lip/files/provincial_icare.csv", 'r') as p:
         site_cap = int(line[2])
         all_sites += [Site(site_name, site_cap)]
 p.close()
+
+# print(len(all_sites))
 
 with open("lip/files/real_icare.csv", 'r') as f:
     reader = csv.reader(f)
@@ -194,17 +190,9 @@ again_student = []
 for site in all_sites:
     again_student += over_limit(site, nationality_data, grade_data, gender_data)
 
-available_sites = []
+assign_students(availability(all_sites), again_student, nationality_data, grade_data, gender_data)
 
-for i in all_sites:
-    if i.has_space():
-        available_sites += [i]
-
-assign_students(available_sites, again_student, nationality_data, grade_data, gender_data)
-
-# assign these students fuck julie u gotta do it
-
-other_students, other_sites = impl_other(least_popular(all_sites))
+other_students, other_sites = impl_other(least_popular(availability(all_sites)))
 # change nationality_data & total_cas_cnt & total
 just_check = LSA.run(other_students, other_sites, nationality_data, total_cas_cnt, total)
 
@@ -216,6 +204,9 @@ for site in all_sites:
     results[site.getName()] = students
     check += [site.getTotal()]
 
+    # if site.getTotal() != len(site.getStudents()):
+    #     print("WHY", site.getTotal(), site.getName(), len(site.getStudents()))
+
 print(standard_deviation(check))
 
 most_popular_site = least_popular(all_sites)[len(all_sites)-1]
@@ -225,9 +216,7 @@ print(most_popular_site.getName(), most_popular_site.getTotal())
 
 # pie(by_nationality(most_popular_site)[0], by_nationality(most_popular_site)[1])
 
-final_students = []
-
-# check cap, move students (if provincial, try to move to provincial)
+# print(sum(check), "check")
 
 toCSV(results)
 

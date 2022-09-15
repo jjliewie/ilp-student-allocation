@@ -53,5 +53,4 @@ def impl_other(all_sites_in_least):
         if i in other_site_dict:
             other_site_dict[i] += 1
         else: other_site_dict[i] = 1
-    
     return other_students, other_sites
