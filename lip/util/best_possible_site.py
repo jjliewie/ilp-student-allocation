@@ -6,7 +6,6 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(SCRIPT_DIR))
 
 from scipy.optimize import linear_sum_assignment
-from obj.site import Site
 
 def make_weights(tnat, site, student, tgrade, tgender):
 

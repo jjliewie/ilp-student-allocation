@@ -13,19 +13,21 @@ def calc_cratio(scas, tcas):
 def make_weights(tnat, tcas, total, site, student):
     weight = 0
     pref_sites = student.getPreferences()
-    if pref_sites:
-        if site in pref_sites:
-            idx = pref_sites.index(site)
-        else: return 1e9
 
-        weight += 10*idx
+    if pref_sites:
+        # if site in pref_sites:
+        #     idx = pref_sites.index(site)
+        # else: return 1e9
+
+        # weight += 10*idx
+
+        if site not in pref_sites:
+            return 1e9
 
         if site.getTotal() >= 30:
             amt_weight = 100
         else: amt_weight = (site.getTotal()*100//total)
         weight += amt_weight
-
-    # print("weights: ", site.getTotal(), site.getName(), amt_weight)
 
     if student.getPrevious():
         if site in student.getPrevious():

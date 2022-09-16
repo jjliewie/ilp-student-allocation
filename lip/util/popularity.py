@@ -18,3 +18,13 @@ def pop_counter(sites):
     for i, site in enumerate(current):
         pop_dict[site] = i
     return pop_dict
+
+def most_available(sites):
+    site_info = []
+    for i in range(len(sites)):
+        site_info.append([sites[i].getLimit()-sites[i].getTotal(), i])
+    site_info.sort(reverse=True)
+    most = []
+    for i in range(len(sites)):
+        most += [sites[site_info[i][1]]]
+    return most

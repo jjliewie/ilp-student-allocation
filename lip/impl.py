@@ -3,7 +3,7 @@ from algo.lsa import LSA
 from obj.student import Student
 from obj.site import Site
 from util.tocsv import toCSV
-from util.popularity import least_popular
+from util.popularity import least_popular, most_available
 from test.test_results import standard_deviation
 from impl_other import impl_other
 from util.over_limit import over_limit
@@ -169,19 +169,18 @@ if unassigned_students:
             if pref.getTotal() <= minimum_amt:
                 minimum_pref = pref
                 minimum_amt = pref.getTotal()
-        # print("final", minimum_pref.getName(), minimum_amt)
         minimum_pref.add_student(s)
         s.setSite(minimum_pref)
 
-# reassign from least popular site
+# reassign from most available site
 
 # print(pos_allocations)
 
-for site in least_popular(all_sites):
+for site in most_available(all_sites):
     for pos_student in pos_allocations[site]:
         if pos_student not in site.getStudents() and not pos_student.senior_returning():
             assigned_site = pos_student.getSite()
-            if assigned_site.getTotal() > site.getTotal():
+            if (assigned_site.getLimit() - assigned_site.getTotal()) < (site.getLimit() - site.getTotal()):
                 assigned_site.remove_student(pos_student)
                 pos_student.setSite(site)
                 site.add_student(pos_student)
@@ -192,7 +191,7 @@ for site in all_sites:
 
 assign_students(availability(all_sites), again_student, nationality_data, grade_data, gender_data)
 
-other_students, other_sites = impl_other(least_popular(availability(all_sites)))
+other_students, other_sites = impl_other(most_available(availability(all_sites)))
 # change nationality_data & total_cas_cnt & total
 just_check = LSA.run(other_students, other_sites, nationality_data, total_cas_cnt, total)
 
@@ -217,6 +216,17 @@ print(most_popular_site.getName(), most_popular_site.getTotal())
 # pie(by_nationality(most_popular_site)[0], by_nationality(most_popular_site)[1])
 
 # print(sum(check), "check")
+
+for k, v in results.items():
+    print(k, len(v))
+
+# number of students who don't get one of their preferences (sorry but tis is the reality)
+t = 0
+for s in all_students:
+    for i in s:
+        if i.getSite() not in i.getPreferences():
+            t += 1
+print(t)
 
 toCSV(results)
 

@@ -21,8 +21,11 @@ def ol_make_weights(tnat, site, student, tgrade, tgender):
 
     weight = 0
 
-    if site not in student.getPreferences():
+    if site.getName() == "X":
         return weight
+
+    if site not in student.getPreferences():
+        weight += 100
 
     weight += int((site.getSpecificNationality(student.getNationality())/tnat[student.getNationality()])*20)
     if student.getPrevious():
