@@ -9,6 +9,7 @@ from impl_other import impl_other
 from util.over_limit import over_limit
 from util.best_possible_site import assign_students
 from util.availability import availability
+from util.toxlsx import toXLSX
 
 all_sites = []
 total = 0
@@ -27,7 +28,7 @@ o9, o10, o11, o12 = [], [], [], []
 # initialization
 
 # metro
-with open("lip/files/metro_icare.csv", 'r') as m:
+with open("ilp/files/metro_icare.csv", 'r') as m:
     reader = csv.reader(m)
     for line in reader:
         site_name = line[1]
@@ -38,7 +39,7 @@ m.close()
 # print(len(all_sites))
 
 # provincial
-with open("lip/files/provincial_icare.csv", 'r') as p:
+with open("ilp/files/provincial_icare.csv", 'r') as p:
     reader = csv.reader(p)
     for line in reader:
         site_name = line[1]
@@ -48,7 +49,7 @@ p.close()
 
 # print(len(all_sites))
 
-with open("lip/files/real_icare.csv", 'r') as f:
+with open("ilp/files/real_icare.csv", 'r') as f:
     reader = csv.reader(f)
     
     for line in reader:
@@ -229,5 +230,6 @@ for s in all_students:
 print(t)
 
 toCSV(results)
+toXLSX(results)
 
 # by now all students should be assigned and it should be optimal!!

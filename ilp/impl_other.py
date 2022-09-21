@@ -7,7 +7,7 @@ def impl_other(all_sites_in_least):
     other_sites = []
     other_students = []
 
-    with open("lip/files/other_students.csv", 'r') as f:
+    with open("ilp/files/other_students.csv", 'r') as f:
         reader = csv.reader(f)
         other_amt = 0
         for line in reader:

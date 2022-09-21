@@ -1,7 +1,7 @@
 import csv
 
 def toCSV(results):
-    with open('lip/files/result.csv', 'w') as f:
+    with open('ilp/files/result.csv', 'w') as f:
         f.truncate()
         writer = csv.writer(f)
         for k, v in results.items():
