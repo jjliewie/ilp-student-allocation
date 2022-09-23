@@ -57,20 +57,16 @@ class Student:
     
     def want_provincial(self):
         for s in self.preferences:
-            if "P" not in s.getName():
+            if "(P)" not in s.getName():
                 return False
         return True
     
     def want_metro(self):
         for s in self.preferences:
-            if "M" not in s.getName():
+            if "(M)" not in s.getName():
                 return False
         return True
-
-# debugging
-
-# p1 = Student('as', [1, 2, 3], "jijs", "dh", 12, "f", [], False, False)
-# p1.setPreferences([3, 4, 1])
-# print(p1.is_assigned())
-# p1.assign("gawad")
-# print(p1.is_assigned())
+    
+    def isAssigned(self):
+        if self.assigned_site: return True
+        return False

@@ -1,7 +1,6 @@
 # calculating nationality ratio
 def calc_nratio(snat, tnat):
     if tnat == 0: 
-        print("shit")
         return 0
     return snat/tnat
 
@@ -15,12 +14,6 @@ def make_weights(tnat, tcas, total, site, student):
     pref_sites = student.getPreferences()
 
     if pref_sites:
-        # if site in pref_sites:
-        #     idx = pref_sites.index(site)
-        # else: return 1e9
-
-        # weight += 10*idx
-
         if site not in pref_sites:
             return 1e9
 
@@ -33,9 +26,21 @@ def make_weights(tnat, tcas, total, site, student):
         if site in student.getPrevious():
             weight += 10
     
-    weight += int(calc_nratio(site.getSpecificNationality(student.getNationality()), tnat[student.getNationality()])*20)
-    
+    if student.getNationality():
+        weight += int(calc_nratio(site.getSpecificNationality(student.getNationality()), tnat[student.getNationality()])*120)
+
     if student.is_planning_cas_project():
-        weight += int(calc_cratio(site.getCasAmt(), tcas)*20) # make 20?
+        weight += int(calc_cratio(site.getCasAmt(), tcas)*50) # make 20?
+    
+    if site.getGenders()[0] > site.getGenders()[1]:
+        if student.getGender() == "M":
+            weight += 10
+    
+    if site.getGenders()[0] < site.getGenders()[1]:
+        if student.getGender() == "F":
+            weight += 10
+    
+    if max(site.getGrades()) == student.getGrade()-9:
+        weight += 15
 
     return weight

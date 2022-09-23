@@ -11,6 +11,12 @@ class Site:
         # male, female, other
         self.grade_cntr = [0, 0, 0, 0]
         # ninth, tenth, eleventh, twelfth
+        self.specific_cntr = [
+            [0, 0, 0], 
+            [0, 0, 0], 
+            [0, 0, 0], 
+            [0, 0, 0]
+        ]
     
     def getLimit(self):
         return self.limit
@@ -22,9 +28,13 @@ class Site:
         self.grade_cntr[student.getGrade() - 9] += 1
         if student.getGender() == "M":
             self.gender_cntr[0] += 1
+            self.specific_cntr[student.getGrade() - 9][0] += 1
         elif student.getGender() == "F":
             self.gender_cntr[1] += 1
-        else: self.gender_cntr[2] += 1
+            self.specific_cntr[student.getGrade() - 9][1] += 1
+        else: 
+            self.gender_cntr[2] += 1
+            self.specific_cntr[student.getGrade() - 9][2] += 1
 
         if student.getNationality() in self.nationality_cntr.keys():
             self.nationality_cntr[student.getNationality()] += 1
@@ -45,9 +55,13 @@ class Site:
         
         if student.getGender() == "M":
             self.gender_cntr[0] -= 1
+            self.specific_cntr[student.getGrade() - 9][0] -= 1
         elif student.getGender() == "F":
             self.gender_cntr[1] -= 1
-        else: self.gender_cntr[2] -= 1
+            self.specific_cntr[student.getGrade() - 9][1] -= 1
+        else: 
+            self.gender_cntr[2] -= 1
+            self.specific_cntr[student.getGrade() - 9][2] -= 1
 
         self.nationality_cntr[student.getNationality()] -= 1
 
@@ -94,3 +108,6 @@ class Site:
     
     def has_space(self):
         return self.total_amt < self.limit
+    
+    def getSpecific(self):
+        return self.specific_cntr

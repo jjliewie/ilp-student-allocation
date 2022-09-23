@@ -38,8 +38,6 @@ class LSA:
                 weights += [weight]
             cost_matrix += [weights]
             # print(student.getName(), weights)
-            
-        # print(cost_matrix)
 
         cost_matrix = np.array(cost_matrix)
 

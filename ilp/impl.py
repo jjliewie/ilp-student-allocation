@@ -10,6 +10,8 @@ from util.over_limit import over_limit
 from util.best_possible_site import assign_students
 from util.availability import availability
 from util.toxlsx import toXLSX
+from util.importance import is_important, too_frequent
+from util.basic_other import make_other, unassigned_other
 
 all_sites = []
 total = 0
@@ -21,11 +23,26 @@ gender_data = [0, 0, 0]
 grade_data = [0, 0, 0, 0]
 # 9, 10, 11, 12
 
+e_idx, n_idx, na_idx = 1, [2, 3], 5
+g_idx, gr_idx, c_idx, r_idx, p_idx = 4, 6, 7, 8, [9, 13]
+
 f9, f10, f11, f12 = [], [], [], []
 m9, m10, m11, m12 = [], [], [], []
 o9, o10, o11, o12 = [], [], [], []
 
 # initialization
+
+email_nat = {}
+with open('ilp/files/all_students.csv', 'r') as f:
+    reader = csv.reader(f)
+    for i, line in enumerate(reader):
+        if i == 0: continue
+        nationality = line[6].split("(")[0].strip()
+        email_nat[line[7].lower().strip()] = nationality
+        if nationality in nationality_data:
+            nationality_data[nationality] += 1
+        else: nationality_data[nationality] = 1
+f.close()
 
 # metro
 with open("ilp/files/metro_icare.csv", 'r') as m:
@@ -49,38 +66,38 @@ p.close()
 
 # print(len(all_sites))
 
-with open("ilp/files/real_icare.csv", 'r') as f:
+# with open("ilp/files/real_icare.csv", 'r') as f:
+with open("ilp/files/final2022.csv", 'r') as f:
     reader = csv.reader(f)
     
-    for line in reader:
-        email = line[10]
-        name = line[7] + " " + line[8]
+    for line_idx, line in enumerate(reader):
+        if line_idx == 0:
+            continue
+        email = line[e_idx]
+        name = line[n_idx[0]] + " " + line[n_idx[1]]
 
         previous = []
-        pref_site_names = line[1:5]
+        pref_site_names = line[p_idx[0]:p_idx[1]]
         pref_sites = []
         for i in pref_site_names:
             for j in all_sites:
                 if i == j.getName():
                     pref_sites += [j]
+        grade = int(line[gr_idx].split()[1])
+        gender = line[g_idx][0]
 
-        grade = int(line[5].split()[1])
-        gender = line[6][0]
-
-        nationality = line[9]
-
-        if nationality in nationality_data:
-            nationality_data[nationality] += 1
-        else: nationality_data[nationality] = 1
+        if email.lower().strip() in email_nat:
+            nationality = email_nat[email.lower().strip()]
+        else: nationality = line[na_idx]
 
         total += 1
 
         cas_project, return_project = False, False
 
-        if line[11].lower() == "yes":
+        if line[c_idx].lower() == "yes":
             cas_project = True
             total_cas_cnt += 1
-        if line[12] and line[12].lower() == "yes":
+        if line[r_idx] and line[r_idx].lower() == "yes":
             return_project = True
         
         tmp_student = Student(email, pref_sites, nationality, 
@@ -158,43 +175,68 @@ for student_group in all_students:
         if student_group:
             unassigned_students += student_group
 
-# print("total:", total)
-if len(unassigned_students) >= len(all_sites):
-    unassigned_students = LSA.run(unassigned_students, all_sites, nationality_data, total_cas_cnt, total)
-
-if unassigned_students:
-    for s in unassigned_students:
-        minimum_pref = None
-        minimum_amt = int(1e9)
-        for pref in s.getPreferences()[::-1]:
-            if pref.getTotal() <= minimum_amt:
-                minimum_pref = pref
-                minimum_amt = pref.getTotal()
-        minimum_pref.add_student(s)
-        s.setSite(minimum_pref)
-
-# reassign from most available site
-
-# print(pos_allocations)
+while unassigned_students:
+    for site in most_available(all_sites):
+        weight, student = int(1e9), None
+        for s in unassigned_students:
+            temp_w = unassigned_other(nationality_data, site, s, grade_data, gender_data)
+            if temp_w < weight:
+                weight = temp_w
+                student = s
+        if student:
+            site.add_student(student)
+            student.setSite(site)
+            unassigned_students.remove(student)
 
 for site in most_available(all_sites):
     for pos_student in pos_allocations[site]:
-        if pos_student not in site.getStudents() and not pos_student.senior_returning():
+        if pos_student not in site.getStudents() and not pos_student.senior_returning() and pos_student.isAssigned():
             assigned_site = pos_student.getSite()
             if (assigned_site.getLimit() - assigned_site.getTotal()) < (site.getLimit() - site.getTotal()):
-                assigned_site.remove_student(pos_student)
-                pos_student.setSite(site)
-                site.add_student(pos_student)
+                # talk to mr.woods about this section!!
+                if not is_important(pos_student, assigned_site) and not too_frequent(pos_student, site):
+                    assigned_site.remove_student(pos_student)
+                    pos_student.setSite(site)
+                    site.add_student(pos_student)
 
 again_student = []
+
 for site in all_sites:
-    again_student += over_limit(site, nationality_data, grade_data, gender_data)
+    again_student += over_limit(site, nationality_data)
 
-assign_students(availability(all_sites), again_student, nationality_data, grade_data, gender_data)
+while again_student:
+    for a in again_student:
+        weight, site = int(1e9), None
+        for s in availability(all_sites):
+            temp_w = make_other(nationality_data, s, a, grade_data, gender_data)
+            if temp_w < weight:
+                weight = temp_w
+                site = s
+        site.add_student(a)
+        a.setSite(site)
+        again_student.remove(a)
 
-other_students, other_sites = impl_other(most_available(availability(all_sites)))
+# assign_students(availability(all_sites), again_student, nationality_data, grade_data, gender_data)
+
+other_students, other_sites = impl_other(most_available(availability(all_sites)), all_students)
 # change nationality_data & total_cas_cnt & total
-just_check = LSA.run(other_students, other_sites, nationality_data, total_cas_cnt, total)
+print(len(availability(all_sites)), len(most_available(availability(all_sites))), "hi")
+
+print(len(other_students), len(other_sites))
+
+for site in other_sites:
+    weight, student = int(1e9), None
+    for s in other_students:
+        temp_w = make_other(nationality_data, site, s, grade_data, gender_data)
+        if temp_w < weight:
+            weight = temp_w
+            student = s
+    if student:
+        site.add_student(student)
+        student.setSite(site)
+        other_students.remove(student)
+
+# just_check = LSA.run(other_students, other_sites, nationality_data, total_cas_cnt, total)
 
 results = {}
 check = []
@@ -204,16 +246,10 @@ for site in all_sites:
     results[site.getName()] = students
     check += [site.getTotal()]
 
-    # if site.getTotal() != len(site.getStudents()):
-    #     print("WHY", site.getTotal(), site.getName(), len(site.getStudents()))
-
 print(standard_deviation(check))
 
 most_popular_site = least_popular(all_sites)[len(all_sites)-1]
 least_popular_site = least_popular(all_sites)[0]
-print(least_popular_site.getName(), least_popular_site.getTotal())
-print(most_popular_site.getName(), most_popular_site.getTotal())
-
 # pie(by_nationality(most_popular_site)[0], by_nationality(most_popular_site)[1])
 
 # print(sum(check), "check")
@@ -223,11 +259,19 @@ for k, v in results.items():
 
 # number of students who don't get one of their preferences (sorry but tis is the reality)
 t = 0
+p, m = 0, 0
 for s in all_students:
     for i in s:
-        if i.getSite() not in i.getPreferences():
+        site = i.getSite()
+        if not site: print(i.getName())
+        if site not in i.getPreferences():
             t += 1
-print(t)
+        if i.want_provincial() and site.isMetro():
+            p += 1
+        if i.want_metro() and site.isProvincial():
+            m += 1
+            print(i.getName())
+print(t, p, m)
 
 toCSV(results)
 toXLSX(results)

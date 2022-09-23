@@ -1,56 +1,46 @@
 import csv
 from obj.student import Student
 from util.rotation import rotation
+from util.create_other_students import compile_others
+from util.availability import availability
+from util.popularity import most_available
 
-def impl_other(all_sites_in_least):
+e_idx, n_idx, g_idx, gr_idx = 7, [4, 1], 5, 0
 
-    other_sites = []
-    other_students = []
+def impl_other(pos_sites, students):
+    left_sites = []
+    left_students = compile_others(students)
+    counter = len(left_students)
+    l_sites = pos_sites
 
-    with open("ilp/files/other_students.csv", 'r') as f:
-        reader = csv.reader(f)
-        other_amt = 0
-        for line in reader:
-            name = line[2] + " " + line[3]
-            email = line[5]
-            grade = int(line[0].split()[1])
-            gender = line[1][0]
-            nationality = line[4]
-            other_amt += 1
-            previous = []
-            tmp_student = Student(email, [], nationality, 
-            name, grade, gender, previous, False, False)
-            other_students += [tmp_student]
+    for site_idx in range(len(l_sites)):
+        if counter < 1: break
+        if site_idx+1 == len(l_sites): diff = 0
+        else: diff = l_sites[site_idx+1].getTotal() - l_sites[site_idx].getTotal()
+        if diff == 0:
+            left_sites += [l_sites[site_idx]]
+            counter -= 1
+            continue
 
-        l_sites = all_sites_in_least
-
-        counter = other_amt
-        for site_idx in range(len(l_sites)-1):
-
-            if counter < 1: break
-
-            diff = l_sites[site_idx+1].getTotal() - l_sites[site_idx].getTotal()
-            if diff == 0:
-                other_sites += [l_sites[site_idx]]
-                counter -= 1
-                continue
-
-            amt_in = (site_idx+1)*diff
-
-            if amt_in <= counter:
-                for _ in range(diff):
-                    other_sites += [l_sites[i] for i in range(site_idx+1)]
-                counter -= amt_in
-            else:
-                other_sites += rotation(counter, l_sites[:site_idx+1])
-                break
-
-    f.close()
-
+        amt_in = (site_idx+1)*diff
+        if amt_in <= counter:
+            for _ in range(diff):
+                left_sites += [l_sites[i] for i in range(site_idx+1)]
+            counter -= amt_in
+        else:
+            left_sites += rotation(counter, l_sites[:site_idx+1])
+            counter = 0
+            break
+    
+    left_sites += rotation(counter, l_sites[:site_idx+1])
+    
     other_site_dict = {}
 
-    for i in other_sites:
-        if i in other_site_dict:
-            other_site_dict[i] += 1
-        else: other_site_dict[i] = 1
-    return other_students, other_sites
+    for i in left_sites:
+        if i.getName() in other_site_dict:
+            other_site_dict[i.getName()] += 1
+        else: other_site_dict[i.getName()] = 1
+
+    print(other_site_dict)
+    
+    return left_students, left_sites

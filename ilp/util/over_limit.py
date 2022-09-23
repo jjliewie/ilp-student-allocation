@@ -8,63 +8,78 @@ sys.path.append(os.path.dirname(SCRIPT_DIR))
 from scipy.optimize import linear_sum_assignment
 from obj.site import Site
 
-def over_limit(site, tnat, tgrade, tgender):
+def over_limit(site, tnat):
     result = []
+    specific = site.getSpecific()
 
-    for student in opt_students(site, tnat, tgrade, tgender):
-        site.remove_student(student)
-        student.setSite(None)
-        result += [student]
-    return result
+    cap_by_gr_ge = [
+        [0, 0, 0],  
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0]
+    ]
 
-def ol_make_weights(tnat, site, student, tgrade, tgender):
+    for gr in range(len(specific)):
+        for ge in range(len(specific[gr])):
+            if site.getLimit()//8 < specific[gr][ge]:
+                cap_by_gr_ge[gr][ge] = (site.getLimit()//8)
 
+    students_by_gr_ge = [
+        [[], [], []],  
+        [[], [], []],
+        [[], [], []],  
+        [[], [], []]
+    ]
+
+    for s in site.getStudents():
+        idx = 2
+        if s.getGender() == "M": idx = 0
+        elif s.getGender() == "F": idx = 1
+        students_by_gr_ge[s.getGrade()-9][idx].append(s)
+
+    for group in range(4):
+        for gender_group in range(3):
+            sp_group = students_by_gr_ge[group][gender_group]
+            if sp_group and cap_by_gr_ge[group][gender_group]:
+                for student in opt_students(site, tnat, sp_group, cap_by_gr_ge[group][gender_group]):
+                    site.remove_student(student)
+                    student.setSite(None)
+                    result += [student]
+    final = []
+    if site.getTotal() < site.getLimit():
+        if result:
+            for student in opt_students(site, tnat, result, site.getLimit()-site.getTotal()):
+                final += [student]
+    
+    for r in result:
+        if r not in final:
+            site.add_student(r)
+            r.setSite(site)
+
+    return final
+
+def ol_make_weights(tnat, site, student):
     weight = 0
-
     if site.getName() == "X":
         return weight
-
     if site not in student.getPreferences():
         weight += 100
-
-    weight += int((site.getSpecificNationality(student.getNationality())/tnat[student.getNationality()])*20)
-    if student.getPrevious():
-        if site in student.getPrevious():
-            weight += 10
-    site_genders = site.getGenders()
-    site_grades = site.getGrades()
-
-    site_grade_ratio = site_grades[student.getGrade()-9] / sum(site_grades)
-    total_grade_ratio = tgrade[student.getGrade()-9] / sum(tgrade)
-
-    if site_grade_ratio > total_grade_ratio:
-        weight += int(100*(site_grade_ratio-total_grade_ratio))
-    else: weight -= 10
-
-    # other gender population at ISM is quite small
-    if student.getGender() == "M": idx = 0
-    else: idx = 1
-
-    site_gender_ratio = site_genders[idx] / sum(site_genders)
-    total_gender_ratio = tgender[idx] / sum(tgender)
-
-    if site_gender_ratio > total_gender_ratio:
-        weight += int(100*(site_gender_ratio-total_gender_ratio))
-    else: weight -= 10
-
+    weight += int((site.getSpecificNationality(student.getNationality())/tnat[student.getNationality()])*40)
     return weight
 
-def opt_students(site, tnat, tgrade, tgender):
+def opt_students(site, tnat, students, cap):
+
     cost_matrix = []
     site_list = []
-    for _ in range(site.getLimit()):
+    for _ in range(cap):
         site_list += [site]
-    for _ in range(site.getTotal()-site.getLimit()):
+    for _ in range(len(students)-cap):
         site_list += [Site("X", int(1e9))]
-    for student in site.getStudents():
+
+    for student in students:
         weights = []
         for s in site_list:
-            weight = ol_make_weights(tnat, s, student, tgrade, tgender)
+            weight = ol_make_weights(tnat, s, student)
             weights += [weight]
         cost_matrix += [weights]
 
@@ -75,10 +90,10 @@ def opt_students(site, tnat, tgrade, tgender):
     opt_ass = list(opt_ass)
 
     move_students = []
-    all_students = site.getStudents()
+    all_students = students
 
-    for i in range(site.getTotal()):
-        if opt_ass[i] >= site.getLimit():
+    for i in range(len(students)):
+        if opt_ass[i] >= cap:
             move_students.append(all_students[i])
 
     return move_students

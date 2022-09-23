@@ -40,9 +40,9 @@ def make_weights(tnat, site, student, tgrade, tgender):
     else: weight -= 10
 
     if student.want_provincial() and site.isMetro():
-        weight += 100
-    if student.want_metro() and site.isProvincial():
         weight += 1000
+    if student.want_metro() and site.isProvincial():
+        weight += int(1e9)
 
     return weight
 
