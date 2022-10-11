@@ -216,13 +216,7 @@ while again_student:
         a.setSite(site)
         again_student.remove(a)
 
-# assign_students(availability(all_sites), again_student, nationality_data, grade_data, gender_data)
-
 other_students, other_sites = impl_other(most_available(availability(all_sites)), all_students)
-# change nationality_data & total_cas_cnt & total
-print(len(availability(all_sites)), len(most_available(availability(all_sites))), "hi")
-
-print(len(other_students), len(other_sites))
 
 for site in other_sites:
     weight, student = int(1e9), None
@@ -236,8 +230,6 @@ for site in other_sites:
         student.setSite(site)
         other_students.remove(student)
 
-# just_check = LSA.run(other_students, other_sites, nationality_data, total_cas_cnt, total)
-
 results = {}
 check = []
 
@@ -250,14 +242,10 @@ print(standard_deviation(check))
 
 most_popular_site = least_popular(all_sites)[len(all_sites)-1]
 least_popular_site = least_popular(all_sites)[0]
-# pie(by_nationality(most_popular_site)[0], by_nationality(most_popular_site)[1])
-
-# print(sum(check), "check")
 
 for k, v in results.items():
     print(k, len(v))
 
-# number of students who don't get one of their preferences (sorry but tis is the reality)
 t = 0
 p, m = 0, 0
 for s in all_students:
@@ -275,5 +263,3 @@ print(t, p, m)
 
 toCSV(results)
 toXLSX(results)
-
-# by now all students should be assigned and it should be optimal!!
